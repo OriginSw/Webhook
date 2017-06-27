@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -18,19 +18,13 @@ namespace Webhook.Helpers
             foreach (var prop in properties)
             {
                 if (prop.PropertyType.IsArray)
-                {
                     foreach (var p in prop.GetValue(obj, null) as string[])
-                    {
                         qs.Add(prop.Name + "=" + HttpUtility.UrlEncode(p.ToString()));
-                    }
-                }
                 else
-                {
                     qs.Add(prop.Name + "=" + HttpUtility.UrlEncode(prop.GetValue(obj, null).ToString()));
-                }
             }
 
-            return String.Join("&", qs.ToArray());
+            return string.Join("&", qs.ToArray());
         }
 
         internal static string GetJsonBody(object obj = null)
@@ -38,7 +32,7 @@ namespace Webhook.Helpers
             if (obj == null)
                 return null;
 
-            return Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+            return JsonConvert.SerializeObject(obj);
         }
     }
 }

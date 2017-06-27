@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using Webhook.Helpers;
 
 namespace Webhook
@@ -15,44 +16,35 @@ namespace Webhook
             OnError = onError;
         }
 
-        private delegate void NotifyMethodCaller(string key, object queryString = null, object body = null);
-
-        public void Notify(string key, object queryString = null, object body = null)
+        public async Task Notify(string key, object queryString = null, object body = null)
         {
             try
             {
-                if (!ConfigSection.Webhook.Hooks.Enable)
+                var data = ConfigSection.Webhook.Data[key];
+
+                if (!(ConfigSection.Webhook.Hooks.Enable && data.Enable))
                     return;
 
-                var qs = ClientHelpers.GetQueryString(queryString);
-                var json = ClientHelpers.GetJsonBody(body);
+                var url = (data.Url ?? ConfigSection.Webhook.Hooks.DefaultUrl) + data.Endpoint;
 
-                var data = ConfigSection.Webhook.Data[key];
                 if (data.Method == "GET")
                 {
-                    var url = data.Url + (data.Url.Contains("?") ? "&" : "?") + qs;
-                    _client.httpGetRequest(url);
+                    url = url + (data.Endpoint.Contains("?") ? "&" : "?") + ClientHelpers.GetQueryString(queryString);
+                    await _client.httpGetRequest(url);
                 }
                 else if (data.Method == "POST")
                 {
-                    _client.httpPostRequest(data.Url, json);
+                    await _client.httpPostRequest(url, ClientHelpers.GetJsonBody(body));
                 }
                 else
                 {
-                    throw new NotImplementedException(String.Format("Http method {0} is not implemented yet", data.Method));
+                    throw new NotImplementedException(string.Format("Http method {0} is not implemented yet", data.Method));
                 }
             }
             catch (Exception ex)
             {
-                if (OnError != null)
-                    OnError(ex);
+                OnError?.Invoke(ex);
             }
-        }
-
-        public void NotifyAsync(string key, object queryString = null, object body = null)
-        {
-            NotifyMethodCaller workerDelegate = new NotifyMethodCaller(Notify);
-            workerDelegate.BeginInvoke(key, queryString, body, null, null);
         }
     }
 }

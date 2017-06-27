@@ -45,6 +45,13 @@ namespace Webhook.Helpers
                 get { return (bool)this["enable"]; }
                 set { this["enable"] = value; }
             }
+
+            [ConfigurationProperty("defaultUrl", IsRequired = false)]
+            public string DefaultUrl
+            {
+                get { return (string)this["defaultUrl"]; }
+                set { this["defaultUrl"] = value; }
+            }
         }
 
         public class UrlConfigurationElement : ConfigurationElement
@@ -56,11 +63,18 @@ namespace Webhook.Helpers
                 set { this["name"] = value; }
             }
 
-            [ConfigurationProperty("url", IsRequired = true)]
+            [ConfigurationProperty("url", IsRequired = false, DefaultValue = null)]
             public string Url
             {
                 get { return (string)this["url"]; }
                 set { this["url"] = value; }
+            }
+
+            [ConfigurationProperty("endpoint", IsRequired = true)]
+            public string Endpoint
+            {
+                get { return (string)this["endpoint"]; }
+                set { this["endpoint"] = value; }
             }
 
             [ConfigurationProperty("method", IsRequired = true)]
@@ -68,6 +82,13 @@ namespace Webhook.Helpers
             {
                 get { return (string)this["method"]; }
                 set { this["method"] = value; }
+            }
+
+            [ConfigurationProperty("enable", IsRequired = false, DefaultValue = true)]
+            public bool Enable
+            {
+                get { return (bool)this["enable"]; }
+                set { this["enable"] = value; }
             }
         }
     }
