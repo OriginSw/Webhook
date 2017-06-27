@@ -63,7 +63,7 @@ namespace Webhook.Helpers
                 set { this["name"] = value; }
             }
 
-            [ConfigurationProperty("url", IsRequired = false, DefaultValue = null)]
+            [ConfigurationProperty("url", IsRequired = false)]
             public string Url
             {
                 get { return (string)this["url"]; }

@@ -25,7 +25,7 @@ namespace Webhook
                 if (!(ConfigSection.Webhook.Hooks.Enable && data.Enable))
                     return;
 
-                var url = (data.Url ?? ConfigSection.Webhook.Hooks.DefaultUrl) + data.Endpoint;
+                var url = (string.IsNullOrEmpty(data.Url) ? ConfigSection.Webhook.Hooks.DefaultUrl : data.Url) + data.Endpoint;
 
                 if (data.Method == "GET")
                 {
