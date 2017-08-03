@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Webhook.Helpers;
 
@@ -25,16 +27,27 @@ namespace Webhook
                 if (!(ConfigSection.Webhook.Hooks.Enable && data.Enable))
                     return;
 
-                var url = (string.IsNullOrEmpty(data.Url) ? ConfigSection.Webhook.Hooks.DefaultUrl : data.Url) + data.Endpoint;
+                IEnumerable<string> urls = string.IsNullOrEmpty(data.Url) ? ConfigSection.Webhook.Hooks.DefaultUrl.Split(',').ToList() : data.Url.Split(',').ToList();
+                urls = urls.Select(x => string.Concat(x.Trim(), data.Endpoint));
+
+                var tasks = new List<Task>();
 
                 if (data.Method == "GET")
                 {
-                    url = url + (data.Endpoint.Contains("?") ? "&" : "?") + ClientHelpers.GetQueryString(queryString);
-                    await _client.httpGetRequest(url);
+                    foreach (var url in urls)
+                    {
+                        var _url = string.Concat(url, data.Endpoint.Contains("?") ? "&" : "?", ClientHelpers.GetQueryString(queryString));
+                        tasks.Add(Task.Factory.StartNew(() => _client.httpGetRequest(_url)));
+                    }
+
+                    Task.WaitAll(tasks.ToArray());
                 }
                 else if (data.Method == "POST")
                 {
-                    await _client.httpPostRequest(url, ClientHelpers.GetJsonBody(body));
+                    foreach (var url in urls)
+                        tasks.Add(Task.Factory.StartNew(() => _client.httpPostRequest(url, ClientHelpers.GetJsonBody(body))));
+
+                    Task.WaitAll(tasks.ToArray());
                 }
                 else
                 {
