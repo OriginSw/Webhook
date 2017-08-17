@@ -1,11 +1,22 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
+using Webhook.Helpers;
 
 namespace Webhook
 {
     public class Client
     {
+        private static Action<Exception> OnError;
+
+        public Client(Action<Exception> onError = null)
+        {
+            OnError = onError;
+        }
+
+        public int Timeout { get { return ConfigSection.Webhook.Hooks.Timeout; } }
+
         public async Task<bool> httpPostRequest(string url, string body = null)
         {
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
@@ -20,11 +31,8 @@ namespace Webhook
                     streamWriter.Flush();
                     streamWriter.Close();
                 }
-
-                using (var httpResponse = (HttpWebResponse)await httpWebRequest.GetResponseAsync())
-                {
-                    return httpResponse.StatusCode == HttpStatusCode.OK;
-                }
+                httpWebRequest.Timeout = Timeout;
+                return await GetResponse(httpWebRequest);
             }
         }
 
@@ -32,11 +40,35 @@ namespace Webhook
         {
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
             httpWebRequest.Method = "GET";
+            httpWebRequest.Timeout = Timeout;
 
-            using (var httpResponse = (HttpWebResponse)await httpWebRequest.GetResponseAsync())
+            return await GetResponse(httpWebRequest);
+        }
+
+        private async Task<bool> GetResponse(WebRequest request)
+        {
+            bool ok = false;
+            try
             {
-                return httpResponse.StatusCode == HttpStatusCode.OK;
+                using (var httpResponse = (HttpWebResponse)await request.GetResponseAsync())
+                {
+                    if (httpResponse.StatusCode == HttpStatusCode.OK)
+                        ok = true;
+                    else
+                        OnError(new WebhookHttpRequestException(((int)httpResponse.StatusCode).ToString(), request.RequestUri));
+                }
             }
+            catch (WebException ex)
+            {
+                if (ex.Response != null)
+                {
+                    var response = (HttpWebResponse)ex.Response;
+                    OnError(new WebhookHttpRequestException(((int)response.StatusCode).ToString(), request.RequestUri, ex));
+                }
+                else
+                    OnError(new WebhookHttpRequestException(ex.Status.ToString(), request.RequestUri, ex));
+            }
+            return ok;
         }
     }
 }

@@ -52,6 +52,13 @@ namespace Webhook.Helpers
                 get { return (string)this["defaultUrl"]; }
                 set { this["defaultUrl"] = value; }
             }
+
+            [ConfigurationProperty("timeout", IsRequired = false, DefaultValue = 60000)]
+            public int Timeout
+            {
+                get { return (int)this["timeout"]; }
+                set { this["timeout"] = value; }
+            }
         }
 
         public class UrlConfigurationElement : ConfigurationElement

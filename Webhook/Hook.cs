@@ -14,7 +14,7 @@ namespace Webhook
 
         public Hook(Action<Exception> onError = null)
         {
-            _client = new Client();
+            _client = new Client(onError);
             OnError = onError;
         }
 
