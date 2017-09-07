@@ -49,6 +49,13 @@ namespace Webhook
 
                     Task.WaitAll(tasks.ToArray());
                 }
+                else if (data.Method == "DELETE")
+                {
+                    foreach (var url in urls)
+                        tasks.Add(Task.Factory.StartNew(() => _client.httpDeleteRequest(url, ClientHelpers.GetJsonBody(body))));
+
+                    Task.WaitAll(tasks.ToArray());
+                }
                 else
                 {
                     throw new NotImplementedException(string.Format("Http method {0} is not implemented yet", data.Method));

@@ -36,6 +36,25 @@ namespace Webhook
             }
         }
 
+        public async Task<bool> httpDeleteRequest(string url, string body = null)
+        {
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+            httpWebRequest.Method = "DELETE";
+            httpWebRequest.ContentType = "application/json";
+
+            using (var streamWriter = new StreamWriter(httpWebRequest.GetRequestStream()))
+            {
+                if (body != null)
+                {
+                    streamWriter.Write(body);
+                    streamWriter.Flush();
+                    streamWriter.Close();
+                }
+                httpWebRequest.Timeout = Timeout;
+                return await GetResponse(httpWebRequest);
+            }
+        }
+
         public async Task<bool> httpGetRequest(string url)
         {
             var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
