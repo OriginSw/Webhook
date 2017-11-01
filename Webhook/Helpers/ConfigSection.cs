@@ -11,6 +11,8 @@ namespace Webhook.Helpers
             get { return (ConfigSection)ConfigurationManager.GetSection("webhook"); }
         }
 
+        #region Default
+
         public Dictionary<string, UrlConfigurationElement> Data
         {
             get
@@ -39,7 +41,7 @@ namespace Webhook.Helpers
                 return ((UrlConfigurationElement)element).Name;
             }
 
-            [ConfigurationProperty("enable", IsKey = true, IsRequired = false)]
+            [ConfigurationProperty("enable", IsRequired = true)]
             public bool Enable
             {
                 get { return (bool)this["enable"]; }
@@ -98,5 +100,85 @@ namespace Webhook.Helpers
                 set { this["enable"] = value; }
             }
         }
+
+        #endregion Default
+
+        #region Aws
+
+        public Dictionary<string, AwsUrlConfigurationElement> AwsData
+        {
+            get
+            {
+                return AwsHooks.OfType<AwsUrlConfigurationElement>().ToDictionary(x => x.Name, x => x);
+            }
+        }
+
+        [ConfigurationProperty("awsHooks", IsDefaultCollection = false)]
+        public AwsUrlConfigurationElementCollection AwsHooks
+        {
+            get { return (AwsUrlConfigurationElementCollection)this["awsHooks"]; }
+            set { this["awsHooks"] = value; }
+        }
+
+        [ConfigurationCollection(typeof(AwsUrlConfigurationElement))]
+        public class AwsUrlConfigurationElementCollection : ConfigurationElementCollection
+        {
+            protected override ConfigurationElement CreateNewElement()
+            {
+                return new AwsUrlConfigurationElement();
+            }
+
+            protected override object GetElementKey(ConfigurationElement element)
+            {
+                return ((AwsUrlConfigurationElement)element).Name;
+            }
+
+            [ConfigurationProperty("enable", IsRequired = true)]
+            public bool Enable
+            {
+                get { return (bool)this["enable"]; }
+                set { this["enable"] = value; }
+            }
+
+            [ConfigurationProperty("arnPrefix", IsRequired = false)]
+            public string ArnPrefix
+            {
+                get { return (string)this["arnPrefix"]; }
+                set { this["arnPrefix"] = value; }
+            }
+        }
+
+        public class AwsUrlConfigurationElement : ConfigurationElement
+        {
+            [ConfigurationProperty("name", IsKey = true, IsRequired = true)]
+            public string Name
+            {
+                get { return (string)this["name"]; }
+                set { this["name"] = value; }
+            }
+
+            [ConfigurationProperty("arnSufix", IsRequired = false)]
+            public string ArnSufix
+            {
+                get { return (string)this["arnSufix"]; }
+                set { this["arnSufix"] = value; }
+            }
+
+            [ConfigurationProperty("arn", IsRequired = false)]
+            public string Arn
+            {
+                get { return (string)this["arn"]; }
+                set { this["arn"] = value; }
+            }
+
+            [ConfigurationProperty("enable", IsRequired = false, DefaultValue = true)]
+            public bool Enable
+            {
+                get { return (bool)this["enable"]; }
+                set { this["enable"] = value; }
+            }
+        }
+
+        #endregion Aws
     }
 }

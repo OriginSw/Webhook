@@ -6,7 +6,7 @@ using Webhook.Helpers;
 
 namespace Webhook
 {
-    public class Client
+    internal class Client
     {
         private static Action<Exception> OnError;
 

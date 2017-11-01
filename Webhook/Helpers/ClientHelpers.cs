@@ -10,7 +10,7 @@ namespace Webhook.Helpers
         internal static string GetQueryString(object obj = null)
         {
             if (obj == null)
-                return null;
+                return string.Empty;
 
             var properties = obj.GetType().GetProperties()
                 .Where(p => p.GetValue(obj, null) != null);
@@ -30,7 +30,7 @@ namespace Webhook.Helpers
         internal static string GetJsonBody(object obj = null)
         {
             if (obj == null)
-                return null;
+                return string.Empty;
 
             return JsonConvert.SerializeObject(obj);
         }
