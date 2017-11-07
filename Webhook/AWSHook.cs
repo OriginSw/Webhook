@@ -11,12 +11,13 @@ namespace Webhook
     {
         private IHook _inner;
         private Action<Exception> OnError;
-        private AmazonSimpleNotificationServiceClient _awsClient;
+
+        private Lazy<AmazonSimpleNotificationServiceClient> _awsClient = new Lazy<AmazonSimpleNotificationServiceClient>(() =>
+                                                                                    new AmazonSimpleNotificationServiceClient());
 
         public AWSHook(IHook inner, Action<Exception> onError = null)
         {
             _inner = inner;
-            _awsClient = new AmazonSimpleNotificationServiceClient();
         }
 
         public async Task Notify(string key, object queryString = null, object body = null)
@@ -44,7 +45,7 @@ namespace Webhook
 
                     var arn = !string.IsNullOrWhiteSpace(data.Arn) ? data.Arn : string.Concat(arnPrefix, data.ArnSufix);
 
-                    await _awsClient.PublishAsync(arn, JsonConvert.SerializeObject(message));
+                    await _awsClient.Value.PublishAsync(arn, JsonConvert.SerializeObject(message));
                 }
             }
             catch (Exception ex)
