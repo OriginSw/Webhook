@@ -10,19 +10,20 @@ namespace Webhook
     public class AWSHook : IHook
     {
         private IHook _inner;
-        private Action<Exception> OnError;
+        private Action<Exception> _onError;
+        private Lazy<AmazonSimpleNotificationServiceClient> _awsClient;
 
-        private Lazy<AmazonSimpleNotificationServiceClient> _awsClient = new Lazy<AmazonSimpleNotificationServiceClient>(() =>
-                                                                                    new AmazonSimpleNotificationServiceClient());
-
-        public AWSHook(IHook inner, Action<Exception> onError = null)
+        public AWSHook(IHook inner = null, Action<Exception> onError = null)
         {
             _inner = inner;
+            _onError = onError;
+            _awsClient = new Lazy<AmazonSimpleNotificationServiceClient>(() => new AmazonSimpleNotificationServiceClient());
         }
 
         public async Task Notify(string key, object queryString = null, object body = null)
         {
-            await _inner.Notify(key, queryString, body);
+            if (_inner != null)
+                await _inner.Notify(key, queryString, body);
             try
             {
                 if (ConfigSection.Webhook.AwsHooks.Enable && ConfigSection.Webhook.AwsData[key].Enable)
@@ -50,7 +51,7 @@ namespace Webhook
             }
             catch (Exception ex)
             {
-                OnError?.Invoke(ex);
+                _onError?.Invoke(ex);
             }
         }
     }
