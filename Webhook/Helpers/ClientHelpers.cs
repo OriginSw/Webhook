@@ -7,27 +7,27 @@ namespace Webhook.Helpers
 {
     public static class ClientHelpers
     {
-        internal static string GetQueryString(object obj = null)
+        internal static string GetQueryString(Dictionary<string, object> obj = null)
         {
             if (obj == null)
                 return string.Empty;
 
-            var properties = obj.GetType().GetProperties()
-                .Where(p => p.GetValue(obj, null) != null);
+            var properties = obj.Where(x => x.Value != null);
             var qs = new List<string>();
             foreach (var prop in properties)
             {
-                if (prop.PropertyType.IsArray)
-                    foreach (var p in prop.GetValue(obj, null) as string[])
-                        qs.Add(prop.Name + "=" + HttpUtility.UrlEncode(p.ToString()));
+                var type = prop.Value.GetType();
+                if (type.IsArray)
+                    foreach (var p in prop.Value as string[])
+                        qs.Add(prop.Key + "=" + HttpUtility.UrlEncode(p.ToString()));
                 else
-                    qs.Add(prop.Name + "=" + HttpUtility.UrlEncode(prop.GetValue(obj, null).ToString()));
+                    qs.Add(prop.Key + "=" + HttpUtility.UrlEncode(prop.Value.ToString()));
             }
 
             return string.Join("&", qs.ToArray());
         }
 
-        internal static string GetJsonBody(object obj = null)
+        internal static string GetJsonBody(Dictionary<string, object> obj = null)
         {
             if (obj == null)
                 return string.Empty;

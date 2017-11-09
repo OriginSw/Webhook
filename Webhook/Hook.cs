@@ -17,7 +17,7 @@ namespace Webhook
             OnError = onError;
         }
 
-        public async Task Notify(string key, object queryString = null, object body = null)
+        public async Task Notify(string key, Dictionary<string, object> queryString = null, Dictionary<string, object> body = null, Dictionary<string, object> metadata = null)
         {
             try
             {
@@ -42,6 +42,8 @@ namespace Webhook
                     }
                     else if (data.Method == "POST")
                     {
+                        if (metadata != null)
+                            body.Add("metadata", metadata);
                         foreach (var url in urls)
                         {
                             var _url = string.Concat(url, data.Endpoint.Contains("?") ? "&" : "?", ClientHelpers.GetQueryString(queryString));
@@ -52,6 +54,8 @@ namespace Webhook
                     }
                     else if (data.Method == "DELETE")
                     {
+                        if (metadata != null)
+                            body.Add("metadata", metadata);
                         foreach (var url in urls)
                         {
                             var _url = string.Concat(url, data.Endpoint.Contains("?") ? "&" : "?", ClientHelpers.GetQueryString(queryString));

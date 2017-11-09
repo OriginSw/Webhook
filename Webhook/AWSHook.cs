@@ -1,6 +1,7 @@
 ﻿using Amazon.SimpleNotificationService;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Threading.Tasks;
 using Webhook.Helpers;
@@ -20,10 +21,9 @@ namespace Webhook
             _awsClient = new Lazy<AmazonSimpleNotificationServiceClient>(() => new AmazonSimpleNotificationServiceClient());
         }
 
-        public async Task Notify(string key, object queryString = null, object body = null)
+        public async Task Notify(string key, Dictionary<string, object> queryString = null, Dictionary<string, object> body = null, Dictionary<string, object> metadata = null)
         {
-            if (_inner != null)
-                await _inner.Notify(key, queryString, body);
+            await _inner?.Notify(key, queryString, body);
             try
             {
                 if (ConfigSection.Webhook.AwsHooks.Enable && ConfigSection.Webhook.AwsData[key].Enable)
@@ -46,7 +46,10 @@ namespace Webhook
 
                     var arn = !string.IsNullOrWhiteSpace(data.Arn) ? data.Arn : string.Concat(arnPrefix, data.ArnSufix);
 
-                    await _awsClient.Value.PublishAsync(arn, JsonConvert.SerializeObject(message));
+                    if (metadata != null)
+                        await _awsClient.Value.PublishAsync(arn, JsonConvert.SerializeObject(message), JsonConvert.SerializeObject(metadata));
+                    else
+                        await _awsClient.Value.PublishAsync(arn, JsonConvert.SerializeObject(message));
                 }
             }
             catch (Exception ex)

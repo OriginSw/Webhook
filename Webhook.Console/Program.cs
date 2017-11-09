@@ -1,4 +1,6 @@
-﻿namespace Webhook.Console
+﻿using System.Collections.Generic;
+
+namespace Webhook.Console
 {
     internal class Program
     {
@@ -9,7 +11,7 @@
             log = log4net.LogManager.GetLogger("Webhook");
 
             IHook hook = new Hook(onError: ex => log.Error(ex));
-            hook.Notify("articles-es", queryString: new { ids = new string[] { "asd", "qwe" } });
+            hook.Notify("articles-es", queryString: new Dictionary<string, object>() { { "ids", new string[] { "asd", "qwe" } } });
 
             System.Console.ReadKey();
         }
