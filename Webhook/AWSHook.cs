@@ -23,7 +23,7 @@ namespace Webhook
 
         public async Task Notify(string key, Dictionary<string, object> queryString = null, Dictionary<string, object> body = null, Dictionary<string, object> metadata = null)
         {
-            await _inner?.Notify(key, queryString, body);
+            await _inner?.Notify(key, queryString, body, metadata);
             try
             {
                 if (ConfigSection.Webhook.AwsHooks.Enable && ConfigSection.Webhook.AwsData[key].Enable)

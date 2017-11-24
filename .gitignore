@@ -181,3 +181,7 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+/.vs/Webhook/v15/Server/sqlite3/db.lock
+/.vs/Webhook/v15/Server/sqlite3/storage.ide
+/.vs/Webhook/v15/Server/sqlite3/storage.ide-shm
+/.vs/Webhook/v15/Server/sqlite3/storage.ide-wal

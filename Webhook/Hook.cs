@@ -32,9 +32,12 @@ namespace Webhook
 
                     if (data.Method == "GET")
                     {
+                        var queryParams = queryString;
+                        if (metadata != null)
+                            queryParams = queryString.Concat(metadata).ToDictionary(x => x.Key, x => x.Value);
                         foreach (var url in urls)
                         {
-                            var _url = string.Concat(url, data.Endpoint.Contains("?") ? "&" : "?", ClientHelpers.GetQueryString(queryString));
+                            var _url = string.Concat(url, data.Endpoint.Contains("?") ? "&" : "?", ClientHelpers.GetQueryString(queryParams));
                             tasks.Add(Task.Factory.StartNew(() => _client.httpGetRequest(_url)));
                         }
 
