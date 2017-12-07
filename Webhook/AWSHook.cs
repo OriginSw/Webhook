@@ -35,7 +35,7 @@ namespace Webhook
 
                     object message;
                     if (queryString != null)
-                        message = new { deleteIds = queryString };
+                        message = queryString;
                     else
                         message = body;
 
